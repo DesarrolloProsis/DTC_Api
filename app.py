@@ -5,6 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy import Table, Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
+from flask_migrate import MigrateCommand
 import os
 
 #Init app0
@@ -15,10 +16,8 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:LaVacaLoca16@localhost/mantenimiento'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-
 #Init db
 db = SQLAlchemy(app)
-
 
 #Inir ma
 ma = Marshmallow(app)
@@ -103,6 +102,7 @@ class DTCTecnico(db.Model):
     __tablename__ = 'DTCTecnico'   
 
     NoReferencia = db.Column(db.String(10), primary_key = True, nullable = False)
+    DTCTecnicoEncabezado = relationship("DTCMovimientos", uselist=False, back_populates="DTCTecnicoMovimientos")
 
     CarrilId = db.Column(db.Integer, db.ForeignKey('CatalogoCarriles.NoCapufeLane'), nullable = False)
     Carril = relationship("CatalogoCarriles",  back_populates = "DTCTecnicoCarril")
@@ -128,6 +128,17 @@ class DTCTecnico(db.Model):
     Diagnostico = db.Column(db.String(30))
     Observacion = db.Column(db.Text)
     Imagen = db.Column(db.Text)
+
+
+class DTCMovimientos(db.Model):
+    __tablename__ = 'DTCMovimientos'
+    
+    NoReferencia = db.Column(db.String(10), primary_key = True, nullable = False)
+    Fecha_Modificacion = db.Column(db.DateTime)
+    Descripcion = db.Column(db.Text)
+
+    #Llave Foranea
+    DTCTecnicoMovimientos = relationship("DTCTecnicos", back_populates ="DTCMovimientosTecnico")
 
 #Schema Usuario
 class UsuarioSchema(ma.Schema):
